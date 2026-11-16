@@ -1,0 +1,548 @@
+practical 1
+
+#python -m pip install numpy matplotlib scikit-learn
+import numpy as np
+import matplotlib.pyplot as plt
+
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error, r2_score
+
+iris = load_iris()
+
+X = iris.data[:, 2].reshape(-1, 1)
+y = iris.data[:, 3]
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
+
+model = LinearRegression()
+
+model.fit(X_train, y_train)
+
+y_pred = model.predict(X_test)
+
+print("Slope:", model.coef_[0])
+print("Intercept:", model.intercept_)
+
+
+print("\nActual vs Predicted:")
+for actual, predicted in zip(y_test, y_pred):
+    print("Actual:", actual, "Predicted:", predicted)
+
+mse = mean_squared_error(y_test, y_pred)
+r2 = r2_score(y_test, y_pred)
+
+print("\nMean Squared Error:", mse)
+print("R2 Score:", r2)
+
+plt.scatter(X_test, y_test)
+plt.plot(X_test, y_pred)
+plt.xlabel("Petal Length")
+plt.ylabel("Petal Width")
+plt.title("Linear Regression using Iris Dataset")
+plt.show()
+
+
+prac 2 ///////////////
+	#pip install scikit-learn#
+
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.naive_bayes import MultinomialNB
+
+
+texts = [
+    "I love this movie",
+    "This movie is excellent",
+    "The movie was amazing",
+    "I enjoyed this film",
+    "This is a wonderful movie",
+    "The acting was great",
+    "I liked this movie",
+    "This film was fantastic",
+    "The story was interesting",
+    "It was an excellent experience",
+    "I hate this movie",
+    "This movie is terrible",
+    "The movie was boring",
+    "I disliked this film",
+    "This is a horrible movie",
+    "The acting was bad",
+    "I did not like this movie",
+    "This film was disappointing",
+    "The story was boring",
+    "It was a terrible experience"
+]
+
+labels = [
+    1,1,1,1,1,1,1,1,1,1,
+    0,0,0,0,0,0,0,0,0,0
+]
+
+# Convert text into numerical features
+vectorizer = CountVectorizer()
+X = vectorizer.fit_transform(texts)
+
+# Create and train Naive Bayes classifier
+model = MultinomialNB()
+model.fit(X, labels)
+
+# Test sentences
+test_texts = [
+    "I love this excellent film",
+    "The movie was boring",
+    "This is a fantastic movie",
+    "I disliked this terrible movie",
+    "The acting was great"
+]
+
+
+X_test = vectorizer.transform(test_texts)
+
+
+predictions = model.predict(X_test)
+
+print("===== NAIVE BAYES TEXT CLASSIFICATION =====")
+
+for text, prediction in zip(test_texts, predictions):
+    result = "Positive" if prediction == 1 else "Negative"
+    print("\nText:", text)
+    print("Prediction:", result)
+   
+print("\n===== PREDICTION PROBABILITIES =====")
+
+probabilities = model.predict_proba(X_test)
+
+for text, probability in zip(test_texts, probabilities):
+    print("\nText:", text)
+    print("Positive:", round(probability[1], 3))
+    print("Negative:", round(probability[0], 3))
+
+print("\n===== MODEL INFORMATION =====")
+print("Training sentences:", len(texts))
+print("Vocabulary size:", len(vectorizer.vocabulary_))
+print("\nVocabulary:")
+print(vectorizer.get_feature_names_out())
+
+prac3 /////////////////
+#pip install pandas scikit-learn
+Email Spam Classification Dataset kaggle
+
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.svm import SVC
+from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
+
+data = pd.read_csv("prac3/emails.csv")
+
+print("Dataset Shape:", data.shape)
+print("\nFirst 5 rows:")
+print(data.head())
+
+X = data.iloc[:, 1:-1]
+y = data.iloc[:, -1]
+
+print("\nClass Distribution:")
+print(y.value_counts())
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
+print("\nTraining Data:", X_train.shape)
+print("Testing Data:", X_test.shape)
+
+model = SVC(kernel="linear")
+
+print("\nTraining SVM model...")
+model.fit(X_train, y_train)
+
+y_pred = model.predict(X_test)
+
+accuracy = accuracy_score(y_test, y_pred)
+
+print("\n========== SVM RESULTS ==========")
+print("Accuracy:", round(accuracy * 100, 2), "%")
+
+print("\nConfusion Matrix:")
+print(confusion_matrix(y_test, y_pred))
+
+print("\nClassification Report:")
+print(classification_report(
+    y_test,
+    y_pred,
+    target_names=["Normal", "Abnormal"]
+))
+
+print("\n========== EMAIL PREDICTION ==========")
+
+sample = X_test.iloc[:5]
+predictions = model.predict(sample)
+for i, prediction in enumerate(predictions):
+    if prediction == 1:
+        result = "Abnormal (Spam)"
+    else:
+        result = "Normal (Not Spam)"
+
+    print("Email", i + 1, ":", result)
+
+
+    prac 4 ////////////////////
+    #pip install numpy scikit-learn
+
+import numpy as np
+from sklearn.cluster import KMeans
+
+# Given data
+X = np.array([
+    [1.713, 1.586], [0.180, 1.786], [0.353, 1.240],
+    [0.940, 1.566], [1.486, 0.759], [1.266, 1.106],
+    [1.540, 0.419], [0.459, 1.799], [0.773, 0.186]
+])
+
+# K-Means with 3 clusters
+kmeans = KMeans(n_clusters=3, random_state=42, n_init=10)
+kmeans.fit(X)
+
+# Display cluster assignments
+print("Cluster Labels:")
+print(kmeans.labels_ + 1)
+
+# Display centroids
+print("\nCentroids:")
+print(kmeans.cluster_centers_)
+
+# New case
+new_data = np.array([[0.906, 0.606]])
+
+# Predict cluster
+cluster = kmeans.predict(new_data)
+
+print("\nNew Case: VAR1=0.906, VAR2=0.606")
+print("Predicted Cluster:", cluster[0] + 1)
+
+
+prac 5 /
+#pip install pandas scikit-learn
+#car evaluation dataset kaggle
+import pandas as pd
+
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.preprocessing import LabelEncoder
+from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
+
+columns = ["buying", "maint", "doors", "persons", "lug_boot", "safety", "class"]
+data = pd.read_csv("prac5/car evaluation_with.csv", names=columns)
+
+print("Dataset Shape:", data.shape)
+print("\nFirst 5 rows:")
+print(data.head())
+
+encoder = LabelEncoder()
+
+for column in data.columns:
+    data[column] = encoder.fit_transform(data[column])
+
+
+X = data.drop("safety", axis=1)
+y = data["safety"]
+
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
+
+model = RandomForestClassifier(
+    n_estimators=100, random_state=42
+)
+
+
+model.fit(X_train, y_train)
+
+
+y_pred = model.predict(X_test)
+
+print("\n===== RANDOM FOREST RESULTS =====")
+print("Accuracy:", round(accuracy_score(y_test, y_pred) * 100, 2), "%")
+
+print("\nConfusion Matrix:")
+print(confusion_matrix(y_test, y_pred))
+
+print("\nClassification Report:")
+print(classification_report(y_test, y_pred))
+
+print("\n===== SAFETY PREDICTION =====")
+for i, prediction in enumerate(model.predict(X_test.iloc[:5])):
+    print("Car", i + 1, "Safety:", prediction)
+
+    prac 6//
+    #pip install pandas scikit-learn xgboost
+
+import pandas as pd
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import VotingClassifier, AdaBoostClassifier, GradientBoostingClassifier, RandomForestClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
+from xgboost import XGBClassifier
+
+X, y = load_iris(return_X_y=True)
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42, stratify=y
+)
+
+models = {
+    "Hard Voting": VotingClassifier([
+        ("lr", LogisticRegression(max_iter=1000)),
+        ("rf", RandomForestClassifier(random_state=42))
+    ], voting="hard"),
+
+    "Soft Voting": VotingClassifier([
+        ("lr", LogisticRegression(max_iter=1000)),
+        ("rf", RandomForestClassifier(random_state=42))
+    ], voting="soft"),
+
+    "AdaBoost": AdaBoostClassifier(n_estimators=50, random_state=42),
+    "GBM": GradientBoostingClassifier(random_state=42),
+    "XGBoost": XGBClassifier(
+        n_estimators=50, eval_metric="mlogloss",
+        random_state=42, n_jobs=1
+    )
+}
+
+results = []
+
+for name, model in models.items():
+    model.fit(X_train, y_train)
+    pred = model.predict(X_test)
+    results.append([
+        name,
+        accuracy_score(y_test, pred),
+        precision_score(y_test, pred, average="macro", zero_division=0),
+        recall_score(y_test, pred, average="macro", zero_division=0),
+        f1_score(y_test, pred, average="macro", zero_division=0)
+    ])
+
+print(pd.DataFrame(results, columns=[
+    "Model", "Accuracy", "Precision", "Recall", "F1 Score"
+]).round(3).to_string(index=False))
+
+
+prac 7 //
+#pip install gymnasium numpy matplotlib
+import gymnasium as gym
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Create Taxi environment
+env = gym.make("Taxi-v4")
+
+# Initialize Q-table
+num_states = env.observation_space.n
+num_actions = env.action_space.n
+
+q_table = np.zeros((num_states, num_actions))
+
+# Set hyperparameters
+episodes = 1500
+learning_rate = 0.5
+discount_factor = 0.95
+epsilon = 1.0
+epsilon_decay = 0.003
+min_epsilon = 0.05
+
+rewards_history = []
+
+# Train the agent using Q-learning
+for episode in range(episodes):
+
+    state, info = env.reset()
+    done = False
+    total_reward = 0
+
+    while not done:
+
+        # Select action using epsilon-greedy strategy
+        if np.random.rand() < epsilon:
+            action = env.action_space.sample()
+        else:
+            action = np.argmax(q_table[state])
+
+        # Perform the selected action
+        next_state, reward, terminated, truncated, info = env.step(action)
+
+        done = terminated or truncated
+
+        # Update Q-value
+        current_q = q_table[state, action]
+        best_next_q = np.max(q_table[next_state])
+
+        q_table[state, action] = current_q + learning_rate * (
+            reward + discount_factor * best_next_q - current_q
+        )
+
+        state = next_state
+        total_reward += reward
+
+    # Reduce exploration over time
+    epsilon = max(min_epsilon, epsilon - epsilon_decay)
+
+    rewards_history.append(total_reward)
+
+# Display reward graph
+plt.figure(figsize=(10, 5))
+
+plt.plot(rewards_history, linewidth=1)
+
+plt.title("Q-Learning Performance in Taxi Environment")
+plt.xlabel("Episode Number")
+plt.ylabel("Total Reward")
+
+plt.grid(True, linestyle="--", alpha=0.6)
+
+plt.tight_layout()
+plt.show()
+
+# Close environment
+env.close()
+
+PRAC 8 ////
+#pip install random
+import tkinter as tk
+import random
+
+Q = {}
+alpha = 0.1
+gamma = 0.9
+epsilon = 0.1
+
+def winner(b):
+    lines = [
+        (0,1,2), (3,4,5), (6,7,8),
+        (0,3,6), (1,4,7), (2,5,8),
+        (0,4,8), (2,4,6)
+    ]
+    for a, c, d in lines:
+        if b[a] == b[c] == b[d] != "":
+            return b[a]
+    return None
+
+def available(b):
+    return [i for i in range(9) if b[i] == ""]
+
+def choose(b, explore=True):
+    moves = available(b)
+    if explore and random.random() < epsilon:
+        return random.choice(moves)
+    values = [Q.get((tuple(b), a), 0) for a in moves]
+    best = max(values)
+    return random.choice([a for a, v in zip(moves, values) if v == best])
+
+# Train AI using Q-Learning
+print("Training AI...")
+
+for episode in range(10000):
+    b = [""] * 9
+    history = []
+
+    while True:
+        state = tuple(b)
+        action = choose(b)
+        history.append((state, action))
+        b[action] = "X"
+
+        if winner(b) == "X":
+            reward = 1
+            break
+        if not available(b):
+            reward = 0
+            break
+
+        b[random.choice(available(b))] = "O"
+
+        if winner(b) == "O":
+            reward = -1
+            break
+        if not available(b):
+            reward = 0
+            break
+
+    for state, action in reversed(history):
+        key = (state, action)
+        Q[key] = Q.get(key, 0) + alpha * (
+            reward - Q.get(key, 0)
+        )
+        reward *= gamma
+
+print("Training completed!")
+
+# Create GUI
+root = tk.Tk()
+root.title("Tic Tac Toe - Q Learning")
+
+board = [""] * 9
+buttons = []
+game_over = False
+
+def refresh():
+    for i in range(9):
+        buttons[i].config(text=board[i])
+
+def finish(msg):
+    global game_over
+    game_over = True
+    status.config(text=msg)
+
+def ai_move():
+    if game_over:
+        return
+
+    move = choose(board, False)
+    board[move] = "X"
+    refresh()
+
+    if winner(board) == "X":
+        finish("AI Wins!")
+    elif not available(board):
+        finish("Draw!")
+
+def human_move(i):
+    if game_over or board[i] != "":
+        return
+
+    board[i] = "O"
+    refresh()
+
+    if winner(board) == "O":
+        finish("You Win!")
+    elif not available(board):
+        finish("Draw!")
+    else:
+        root.after(400, ai_move)
+
+def reset():
+    global board, game_over
+    board = [""] * 9
+    game_over = False
+    status.config(text="Your turn (O)")
+    refresh()
+
+for i in range(9):
+    btn = tk.Button(
+        root, text="", font=("Arial", 25),
+        width=5, height=2,
+        command=lambda i=i: human_move(i)
+    )
+    btn.grid(row=i//3, column=i%3)
+    buttons.append(btn)
+
+status = tk.Label(root, text="Your turn (O)")
+status.grid(row=3, column=0, columnspan=3)
+
+tk.Button(root, text="New Game", command=reset).grid(
+    row=4, column=0, columnspan=3
+)
+
+root.mainloop()
